@@ -2,17 +2,17 @@ import polka from 'polka'
 import chalk from 'chalk'
 import sirv from 'sirv'
 import fs from 'fs/promises'
+import path from 'path'
 
-function serve(options) {
+export default function serve(options) {
+    console.log(options)
     const app = polka()
-        .use(sirv(options.o))
+        .use(sirv(options.serverOutputDir))
         .get("/", async (req, res) => {
-            const module = await import('../src/app.mjs')
+            const module = await import(`file://${options.serverOutput}`)
             const state = await module.loader(req)
             const html = module.default(state)
             const str = `
-            
-          
           <!DOCTYPE html>
 <html>
 <head>
@@ -22,17 +22,16 @@ function serve(options) {
     <link rel="icon" href="data:" />
     <link rel="stylesheet" href="/public/style.css">
     <meta name="referrer" content="no-referrer" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 </head>
-
             <script>
             window.__state = ${JSON.stringify(state)}
             </script>
-          <script type="module" src="./asta.js"></script></script><body>${html}</body>
+            <script type="module" src="/public/client.mjs"></script></script><body>${html}</body>
 </html>`
             res.end(str)
         }).get('/data', async (req, res) => {
-            const json = await fs.readFile('./src/public/data.json')
+            const json = await fs.readFile(path.join(options.serverOutputDir, 'public/data.json'))
             res.end(json)
         })
         .listen(1234, (err) => {
@@ -41,4 +40,3 @@ function serve(options) {
         })
     return app.server
 }
-serve({ o: './src' })

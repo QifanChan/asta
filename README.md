@@ -15,7 +15,6 @@
 ### Run demo
 
 ```shell
-yarn build
 yarn start
 ```
 
@@ -25,8 +24,7 @@ yarn start
 input:
 
 ```jsx
-// esbuild loader return path in server
-import { addCount } from '~action/count.js' 
+const addCount = $import('./action.js#addCount')
 
 // state: will run in server and inject to client
 export const loader = async (req) => {
@@ -39,7 +37,7 @@ export const loader = async (req) => {
 export default ({ count }) => {
 	return (
 		<main>
-			<button $onclick={addCount}>{count}</button>
+			<button onclick={addCount}>{count}</button>
 		</main>
 	)
 }
@@ -48,12 +46,12 @@ export default ({ count }) => {
 output:
 
 ```html
-<main><button $onclick="./action/count.js?mod=addCount" data-id="1">0</button></main>
+<main><button $onclick="./action/count.js?mod=addCount">0</button></main>
 ```
 
 ### Compiler
 
-Sdom in server, Vdom in client
+Jointing on server, Resumable on client
 
 ```js
 // jsx input
@@ -109,9 +107,5 @@ Asta 的核心是根治性能问题，已知的 SSR 框架有几个性能瓶颈�
 - 一个新兴的概念，叫做 Resumable，client 不再水合，而是将必要的信息序列化到 html 里，然后直接从 html 进行恢复，所有的 js 都根据交互懒加载，这样就可以做到 0 js，0 水合，而且这是 O(1) 的，不会因为业务增长而性能下降
 
 Asta 双重优化，彻底根除 SSR 的性能瓶颈
-
-### Todo
-
-diff
 
 
